@@ -1,0 +1,18 @@
+.blog-card a {
+  text-decoration: none;
+  color: inherit;
+  display: block;
+  height: 100%;
+}
+
+.blog-card a:hover,
+.blog-card a:visited,
+.blog-card a:active {
+  text-decoration: none;
+  color: inherit;
+}
+
+.blog-card h3,
+.blog-card p {
+  text-decoration: none;
+}

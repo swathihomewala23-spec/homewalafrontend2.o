@@ -1,0 +1,651 @@
+.searchbox-wrap {
+  width: min(1515px, 100%);
+}
+
+.searchbox-head {
+  display: inline-flex;
+  align-items: center;
+  gap: 24px;
+  padding: 0 28px;
+  height: 56px;
+  background: rgba(255, 255, 255, 0.98);
+  border-radius: 18px 18px 0 0;
+  box-shadow: 0 8px 20px rgba(19, 40, 63, 0.06);
+}
+
+.searchbox-head button {
+  position: relative;
+  height: 100%;
+  border: none;
+  background: transparent;
+  color: #242934;
+  font-size: 0.98rem;
+  font-weight: 500;
+  cursor: pointer;
+}
+
+.searchbox-head button.is-active::after {
+  content: "";
+  position: absolute;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  height: 2px;
+  background: #2b313d;
+  border-radius: 999px;
+}
+
+.searchbox-panel {
+  display: grid;
+  grid-template-columns: 1.25fr 1.05fr 1.05fr 1.05fr auto;
+  align-items: center;
+  min-height: 92px;
+  padding: 0 18px 0 20px;
+  background: rgba(255, 255, 255, 0.98);
+  border-radius: 0 18px 18px 18px;
+  box-shadow: 0 18px 42px rgba(19, 40, 63, 0.12);
+}
+
+.searchbox-field,
+.searchbox-ai,
+.searchbox-map {
+  min-height: 50px;
+  padding: 0 28px;
+}
+
+.searchbox-field {
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  gap: 8px;
+}
+
+.searchbox-location-field {
+  position: relative;
+  align-self: stretch;
+  gap: 10px;
+  padding-top: 6px;
+}
+
+.searchbox-field > span,
+.searchbox-ai > span:last-child,
+.searchbox-map > span:last-child {
+  color: #1f242d;
+  font-size: 0.93rem;
+  font-weight: 700;
+}
+
+.searchbox-select-trigger {
+  width: 100%;
+  min-height: 36px;
+  border: none;
+  background: transparent;
+  padding: 0;
+  display: flex;
+  align-items: center;
+  line-height: 1;
+  justify-content: space-between;
+  gap: 12px;
+  cursor: pointer;
+  appearance: none;
+  -webkit-appearance: none;
+  text-align: left;
+}
+
+.searchbox-select-wrap {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  min-width: 0;
+  flex: 1;
+}
+
+.searchbox-clear-button {
+  width: 24px;
+  height: 24px;
+  margin-left: auto;
+  border: none;
+  border-radius: 999px;
+  background: #e8f5fd;
+  color: #169ddf;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 1rem;
+  line-height: 1;
+  cursor: pointer;
+  flex: none;
+  transition: background-color 0.2s ease, color 0.2s ease, transform 0.2s ease;
+}
+
+.searchbox-clear-button:hover {
+  background: #d8f0fc;
+  color: #0f86c4;
+  transform: scale(1.02);
+}
+
+.searchbox-clear-button:focus-visible {
+  outline: 2px solid #18b8e9;
+  outline-offset: 2px;
+}
+
+.searchbox-select-value {
+  color: #6f7986;
+  font-size: 0.88rem;
+  font-weight: 500;
+  line-height: 1.2;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.searchbox-select-caret {
+  color: #6f7986;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  flex: none;
+  align-self: center;
+  margin-top: 0;
+  transition: transform 0.2s ease;
+}
+
+.searchbox-select-trigger.is-open .searchbox-select-caret {
+  transform: rotate(180deg);
+}
+
+.searchbox-select-caret svg {
+  width: 16px;
+  height: 16px;
+  display: block;
+}
+
+.searchbox-location-menu {
+  position: absolute;
+  top: calc(100% + 10px);
+  left: 28px;
+  right: 28px;
+  z-index: 20;
+  display: flex;
+  flex-direction: column;
+  padding: 8px 0;
+  border: 1px solid #d8e1e8;
+  border-radius: 14px;
+  background: #ffffff;
+  box-shadow: 0 18px 36px rgba(19, 40, 63, 0.14);
+}
+
+.searchbox-budget-menu {
+  position: absolute;
+  top: calc(100% + 10px);
+  left: 28px;
+  right: 28px;
+  z-index: 20;
+  display: flex;
+  flex-direction: column;
+  padding: 8px 0;
+  border: 1px solid #d8e1e8;
+  border-radius: 14px;
+  background: #ffffff;
+  box-shadow: 0 18px 36px rgba(19, 40, 63, 0.14);
+}
+
+.searchbox-location-option {
+  border: none;
+  background: transparent;
+  padding: 11px 16px;
+  text-align: left;
+  color: #526071;
+  font-size: 0.92rem;
+  cursor: pointer;
+}
+
+.searchbox-location-option:hover,
+.searchbox-location-option.is-active {
+  background: #f3f8fc;
+  color: #1b2330;
+}
+
+.searchbox-budget-option {
+  border: none;
+  background: transparent;
+  padding: 11px 16px;
+  text-align: left;
+  color: #526071;
+  font-size: 0.92rem;
+  cursor: pointer;
+}
+
+.searchbox-budget-option:hover,
+.searchbox-budget-option.is-active {
+  background: #f3f8fc;
+  color: #1b2330;
+}
+
+.searchbox-location-options,
+.searchbox-budget-options {
+  max-height: 220px;
+  overflow-y: auto;
+  display: flex;
+  flex-direction: column;
+}
+
+.searchbox-location-options::-webkit-scrollbar,
+.searchbox-budget-options::-webkit-scrollbar {
+  width: 6px;
+}
+.searchbox-location-options::-webkit-scrollbar-track,
+.searchbox-budget-options::-webkit-scrollbar-track {
+  background: transparent;
+}
+.searchbox-location-options::-webkit-scrollbar-thumb,
+.searchbox-budget-options::-webkit-scrollbar-thumb {
+  background-color: #d8e1e8;
+  border-radius: 10px;
+}
+
+.searchbox-location-no-results {
+  padding: 11px 16px;
+  color: #6f7986;
+  font-size: 0.88rem;
+  text-align: center;
+}
+
+.searchbox-field-icon,
+.searchbox-map-icon,
+.searchbox-ai-icon {
+  width: 34px;
+  height: 34px;
+  border-radius: 999px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  flex: none;
+}
+
+.searchbox-field-icon,
+.searchbox-map-icon {
+  background: #eef7fd;
+  color: #169ddf;
+}
+
+.searchbox-ai-icon {
+  width: 30px;
+  height: 30px;
+  background: #eff7fd;
+  color: #149bde;
+}
+
+.searchbox-field select {
+  width: 100%;
+  border: none;
+  background: transparent;
+  color: #6f7986;
+  font-size: 0.88rem;
+  font-weight: 500;
+  padding: 0;
+  outline: none;
+  cursor: pointer;
+  appearance: none;
+  -webkit-appearance: none;
+  -moz-appearance: none;
+  line-height: 1.2;
+}
+
+.searchbox-divider {
+  border-left: 1px solid #e7ecf1;
+}
+
+.searchbox-price-field select {
+  width: 100%;
+  padding-right: 22px;
+  color: #6f7986;
+  background-image:
+    linear-gradient(45deg, transparent 50%, #6f7986 50%),
+    linear-gradient(135deg, #6f7986 50%, transparent 50%);
+  background-position:
+    calc(100% - 10px) 55%,
+    calc(100% - 4px) 55%;
+  background-size: 6px 6px, 6px 6px;
+  background-repeat: no-repeat;
+}
+
+.searchbox-price-field select:hover {
+  color: #1b2330;
+}
+
+.searchbox-price-field select:focus-visible {
+  color: #1b2330;
+}
+
+.searchbox-price-field {
+  position: relative;
+  align-self: stretch;
+  gap: 10px;
+  padding-top: 6px;
+}
+
+.searchbox-ai,
+.searchbox-map {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 10px;
+  color: #20242d;
+  border: none;
+  background: transparent;
+  text-decoration: none;
+  background: transparent;
+  border: none;
+  padding: 0;
+  cursor: pointer;
+}
+
+.searchbox-ai svg,
+.searchbox-map svg,
+.searchbox-field-icon svg,
+.searchbox-button svg,
+.searchbox-link-icon svg {
+  width: 17px;
+  height: 17px;
+  fill: currentColor;
+  flex: none;
+}
+
+.searchbox-map-icon svg,
+.searchbox-ai-icon svg,
+.searchbox-field-icon svg {
+  width: 16px;
+  height: 16px;
+}
+
+.searchbox-button {
+  width: 120px;
+  height: 48px;
+  border: none;
+  border-radius: 12px;
+  background: linear-gradient(135deg, #18c6f4 0%, #20b8f0 100%);
+  color: #ffffff;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  font-size: 0.92rem;
+  font-weight: 700;
+  cursor: pointer;
+}
+
+
+@media (max-width: 1280px) {
+  .searchbox-head {
+    gap: 18px;
+    padding: 0 22px;
+  }
+
+  .searchbox-panel {
+    grid-template-columns: 1fr 1fr 1fr 1fr auto;
+    padding: 0 14px;
+  }
+
+  .searchbox-field,
+  .searchbox-ai,
+  .searchbox-map {
+    padding: 0 18px;
+  }
+
+  .searchbox-location-menu {
+    left: 18px;
+    right: 18px;
+  }
+
+  .searchbox-budget-menu {
+    left: 18px;
+    right: 18px;
+  }
+}
+
+@media (max-width: 1024px) {
+  .searchbox-head {
+    gap: 14px;
+    padding: 0 16px;
+  }
+
+  .searchbox-head button {
+    font-size: 0.92rem;
+  }
+
+  .searchbox-panel {
+    grid-template-columns: 1fr 1fr;
+    gap: 14px;
+    padding: 16px;
+  }
+
+  .searchbox-field,
+  .searchbox-ai,
+  .searchbox-map {
+    min-height: auto;
+    padding: 0;
+  }
+
+  .searchbox-divider {
+    border-left: none;
+  }
+
+  .searchbox-ai,
+  .searchbox-map {
+    justify-content: flex-start;
+  }
+
+  .searchbox-location-menu {
+    left: 0;
+    right: 0;
+  }
+
+  .searchbox-budget-menu {
+    left: 0;
+    right: 0;
+  }
+
+  .searchbox-button {
+    width: 100%;
+  }
+
+  .searchbox-links {
+    gap: 16px;
+    margin-top: 16px;
+  }
+}
+
+@media (max-width: 768px) {
+  .searchbox-location-field {
+    gap: 8px;
+    padding-top: 2px;
+  }
+  .searchbox-wrap {
+    width: 100%;
+    margin-top: 0;
+    position: relative;
+    z-index: 10;
+  }
+
+  .searchbox-head {
+    gap: 8px;
+    padding: 0;
+    height: auto;
+    background: transparent;
+    box-shadow: none;
+    flex-wrap: wrap;
+  }
+
+  .searchbox-head button {
+    min-width: 0;
+    padding: 7px 12px;
+    height: auto;
+    border: 1px solid #d7dfe7;
+    border-radius: 10px;
+    background: #ffffff;
+    font-size: 0.72rem;
+    line-height: 1.1;
+    box-shadow: 0 3px 10px rgba(18, 36, 56, 0.06);
+  }
+
+  .searchbox-head button.is-active {
+    background: #1fb3f0;
+    color: #ffffff;
+    border-color: #1fb3f0;
+  }
+
+  .searchbox-head button.is-active::after {
+    display: none;
+  }
+
+  .searchbox-panel {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: 10px 12px;
+    margin-top: 8px;
+    padding: 12px;
+    border-radius: 14px;
+    min-height: 0;
+    box-shadow: 0 10px 28px rgba(19, 40, 63, 0.12);
+  }
+
+  .searchbox-field,
+  .searchbox-ai,
+  .searchbox-map {
+    min-height: 0;
+    padding: 0;
+  }
+
+  .searchbox-location-field,
+  .searchbox-price-field,
+  .searchbox-map,
+  .searchbox-ai {
+    min-width: 0;
+  }
+
+  .searchbox-mobile-top-field {
+    align-items: flex-start;
+    gap: 5px;
+  }
+
+  .searchbox-field > span,
+  .searchbox-ai > span:last-child,
+  .searchbox-map > span:last-child {
+    font-size: 0.68rem;
+  }
+
+  .searchbox-field select,
+  .searchbox-select-value {
+    font-size: 0.72rem;
+  }
+
+  .searchbox-price-field select {
+    padding-right: 18px;
+  }
+
+  .searchbox-divider {
+    border-left: none;
+  }
+
+  .searchbox-location-field {
+    grid-column: 1;
+    grid-row: 1;
+  }
+
+  .searchbox-price-field {
+    grid-column: 2;
+    grid-row: 1;
+  }
+
+  .searchbox-map {
+    grid-column: 1;
+    grid-row: 2;
+    display: inline-flex;
+    align-items: center;
+    justify-content: flex-start;
+    gap: 8px;
+    padding-top: 2px;
+    align-self: center;
+  }
+
+  .searchbox-ai {
+    grid-column: 2;
+    grid-row: 2;
+    display: inline-flex;
+    align-items: center;
+    justify-content: flex-start;
+    gap: 8px;
+    padding-top: 2px;
+    align-self: center;
+    margin-top: 8px;
+  }
+
+  .searchbox-button {
+    grid-column: 1 / -1;
+    grid-row: 3;
+    width: 100%;
+    height: 34px;
+    border-radius: 9px;
+    font-size: 0.76rem;
+  }
+
+  .searchbox-field-icon,
+  .searchbox-map-icon,
+  .searchbox-ai-icon {
+    width: 28px;
+    height: 28px;
+  }
+
+  .searchbox-clear-button {
+    width: 22px;
+    height: 22px;
+    font-size: 0.9rem;
+  }
+
+  .searchbox-map-icon,
+  .searchbox-ai-icon {
+    flex-shrink: 0;
+  }
+
+  .searchbox-map > span:last-child,
+  .searchbox-ai > span:last-child {
+    line-height: 1;
+    white-space: nowrap;
+  }
+
+  .searchbox-location-menu {
+    top: calc(100% + 8px);
+    left: 0;
+    right: 0;
+  }
+
+  .searchbox-links {
+    display: none !important;
+  }
+
+  .searchbox-links::-webkit-scrollbar {
+    display: none;
+  }
+
+  .searchbox-link {
+    flex: 0 0 auto;
+    gap: 6px;
+    font-size: 0.74rem;
+    white-space: nowrap;
+  }
+
+  .searchbox-link-icon {
+    width: 24px;
+    height: 24px;
+  }
+
+  .searchbox-link svg {
+    width: 12px;
+    height: 12px;
+  }
+}
+@media (min-width: 1025px) {
+  .searchbox-wrap {
+    margin-top: 0;
+  }
+}

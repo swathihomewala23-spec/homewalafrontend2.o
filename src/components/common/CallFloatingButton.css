@@ -1,0 +1,57 @@
+.call-float {
+  position: fixed;
+  z-index: 59;
+  display: flex;
+  align-items: center;
+  pointer-events: auto;
+}
+
+.call-float--bottom-right {
+  right: 28px;
+  bottom: 156px;
+}
+
+.call-float--bottom-left {
+  left: 24px;
+  bottom: 208px;
+}
+
+.call-float--top-right {
+  right: 24px;
+  top: 24px;
+}
+
+.call-float--top-left {
+  left: 24px;
+  top: 24px;
+}
+
+.call-float__button {
+  width: 40px;
+  height: 40px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: #c00000;
+  border-radius: 20%;
+  box-shadow: 0 10px 24px rgba(0, 0, 0, 0.18);
+  text-decoration: none;
+  transition: transform 0.22s ease, box-shadow 0.22s ease;
+}
+
+.call-float__button:hover {
+  transform: scale(1.06);
+  box-shadow: 0 14px 28px rgba(0, 0, 0, 0.22);
+}
+
+@media (max-width: 768px) {
+  .call-float--bottom-right {
+    right: 16px;
+    bottom: 148px;
+  }
+
+  .call-float__button {
+    width: 36px;
+    height: 36px;
+  }
+}
