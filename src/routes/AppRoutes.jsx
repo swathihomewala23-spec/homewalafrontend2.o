@@ -113,11 +113,11 @@ const AppRoutes = () => {
         />
         <Route path="/details/:id/:title" element={<DetailsPage />} />
         <Route path="/property-management" element={<PropertyManagementPage />} />
-        <Route path="/map" element={<MapView />} />
+        <Route path="/map/*" element={<MapView />} />
         {sharedPropertyPaths.map((path) => (
           <Route
             key={path}
-            path={path}
+            path={`${path}/*`}
             element={<PropertiesPage />}
           />
         ))}

@@ -3,6 +3,7 @@ import { useDispatch, useSelector } from "react-redux";
 import { useNavigate } from "react-router-dom";
 import { api } from "../axiosConfig";
 import { setFilterdData } from "../features/BasicSlice";
+import { buildPropertyUrl } from "../utils/propertyUrl";
 import "./popularAreas.css";
 
 const getAreaName = (area) => area?.name || area?.location || area?.property_area || area?.city || "Location";
@@ -151,13 +152,9 @@ const PopularAreas = () => {
 
     dispatch(setFilterdData(updatedFilter));
 
-    const params = new URLSearchParams();
-    params.set("location", areaName);
-
     navigate(
       {
-        pathname: "/properties",
-        search: `?${params.toString()}`,
+        pathname: buildPropertyUrl("/properties", { location: areaName }),
       },
       {
         state: {

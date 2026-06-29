@@ -160,7 +160,6 @@
 //   };
 
 //   const handleSearch = (value) => {
-//     const type = value?.type || inferTypeFromLabel(value?.name);
 //     const area = toTitleCase(value?.property_area || value?.name);
 
 //     dispatch(
@@ -168,20 +167,12 @@
 //         ...filter,
 //         property_area: [area],
 //         search: [area],
-//         property_type: type,
 //         paginate: 1,
 //       })
 //     );
 
-//     const params = new URLSearchParams();
-//     if (area) params.set("location", area);
-//     if (type && type !== "property") params.set("type", type);
-
 //     window.scrollTo({ top: 80, left: 0, behavior: "auto" });
-//     navigate({
-//       pathname: "/properties",
-//       search: params.toString() ? `?${params.toString()}` : "",
-//     });
+//     navigate(buildPropertyUrl("/properties", { location: area }));
 //   };
 
 //   const toggleShowAllLinks = () => {
@@ -370,6 +361,8 @@ import { useDispatch, useSelector } from "react-redux";
 import { api } from "../../axiosConfig";
 import { setFilterdData } from "../../features/BasicSlice";
 import { getWebsiteLogoUrl } from "../../utils/brandAssets";
+import { buildPropertyUrl } from "../../utils/propertyUrl";
+import { buildUniqueProjectLocations, resolveProjectLocation } from "../../utils/projectLocations";
 import "./footer.css";
 
 const fallbackFooterLinks = [
@@ -410,9 +403,15 @@ const inferTypeFromLabel = (value) => {
   return "property";
 };
 
+const extractAreaFromLabel = (value) => {
+  const text = normalizeText(value);
+  const match = text.match(/(?:apartments?|flats?|villas?|plots?|lands?|properties|projects)\s+in\s+(.+)/i);
+  return match?.[1] || text;
+};
+
 const toFooterLink = (item) => {
   const name = item?.name || item?.link || item?.label || item?.title || "";
-  const rawArea = item?.property_area || item?.area || item?.location || item?.city || name;
+  const rawArea = item?.property_area || item?.area || item?.location || item?.city || extractAreaFromLabel(name);
   const propertyArea = toTitleCase(rawArea);
 
   return {
@@ -431,6 +430,7 @@ const Footer = () => {
   const [footerLinks, setFooterLinks] = useState(fallbackFooterLinks);
   const [activeTab, setActiveTab] = useState("Real Estate");
   const [showAllLinks, setShowAllLinks] = useState(false);
+  const [projectLocations, setProjectLocations] = useState([]);
   const [logoBroken, setLogoBroken] = useState(false);
   const [websiteInfo, setWebsiteInfo] = useState({
     logo: "",
@@ -476,6 +476,21 @@ const Footer = () => {
   };
 
   const fetchFooterLinks = async () => {
+    try {
+      const response = await api.post("get-filtered-listview-properties", {
+        paginate: 0,
+        per_page: 9999,
+      });
+      const items = response?.data?.data ?? response?.data ?? [];
+      const locations = buildUniqueProjectLocations(Array.isArray(items) ? items : []);
+
+      if (locations.length > 0) {
+        setProjectLocations(locations);
+      }
+    } catch (error) {
+      console.error("Failed to fetch project locations for footer:", error);
+    }
+
     try {
       const response = await api.get("/get-footer-links");
       const apiLinks = response.data?.links ?? response.data?.data ?? [];
@@ -527,28 +542,20 @@ const Footer = () => {
   };
 
   const handleSearch = (value) => {
-    const type = value?.type || inferTypeFromLabel(value?.name);
-    const area = toTitleCase(value?.property_area || value?.name);
+    const area = resolveProjectLocation(value?.property_area || value?.name, projectLocations);
+    if (!area) return;
 
     dispatch(
       setFilterdData({
         ...filter,
         property_area: [area],
         search: [area],
-        property_type: type,
         paginate: 1,
       })
     );
 
-    const params = new URLSearchParams();
-    if (area) params.set("location", area);
-    if (type && type !== "property") params.set("type", type);
-
     window.scrollTo({ top: 80, left: 0, behavior: "auto" });
-    navigate({
-      pathname: "/properties",
-      search: params.toString() ? `?${params.toString()}` : "",
-    });
+    navigate(buildPropertyUrl("/properties", { location: area }));
   };
 
   const toggleShowAllLinks = () => {

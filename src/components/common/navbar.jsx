@@ -569,7 +569,7 @@
 //         dispatch(setFilterdData(updatedFilter));
 
 //         if (value === "Apartment") {
-//           navigate("/apartments-in-chennai?type=Apartment", {
+//           navigate("/apartments-in-chennai/type/Apartment", {
 //             state: {
 //               filters: updatedFilter,
 //               heading: "Apartments in Chennai",
@@ -577,7 +577,7 @@
 //             },
 //           });
 //         } else if (value === "Villa") {
-//           navigate("/villas-in-chennai?type=Villa", {
+//           navigate("/villas-in-chennai/type/Villa", {
 //             state: {
 //               filters: updatedFilter,
 //               heading: "Villas in Chennai",
@@ -585,7 +585,7 @@
 //             },
 //           });
 //         } else if (value === "Plot") {
-//           navigate("/plots-in-chennai?type=Plot", {
+//           navigate("/plots-in-chennai/type/Plot", {
 //             state: {
 //               filters: updatedFilter,
 //               heading: "Plots in Chennai",
@@ -593,7 +593,7 @@
 //             },
 //           });
 //         } else if (value === "Individual House") {
-//           navigate("/individual-house-in-chennai?type=Individual%20House", {
+//           navigate("/individual-house-in-chennai/type/Individual-House", {
 //             state: {
 //               filters: updatedFilter,
 //               heading: "Individual Houses in Chennai",
@@ -746,6 +746,7 @@ import postPropertyImage from "../../assets/postpropertypage.jpeg";
 import { setFilterdData, setIsNavbarModalOpen, setPropertiesList } from "../../features/BasicSlice";
 import { api } from "../../axiosConfig";
 import { getWebsiteLogoUrl } from "../../utils/brandAssets";
+import { buildPropertyUrl } from "../../utils/propertyUrl";
 import { toast } from "react-toastify";
 import "./navbar.css";
 
@@ -971,10 +972,7 @@ const viewTypeHandleChange = (view) => {
   if (view === "Map") {
     const locationParam = searchParams.get("location");
     // Pass location in URL → MapView reads it once at mount, no Redux needed
-    navigate(locationParam
-      ? `/map?location=${encodeURIComponent(locationParam)}`
-      : "/map"                    // no location → MapView shows ALL properties
-    );
+    navigate(buildPropertyUrl("/map", { location: locationParam }));
   }
 };
 const BuilderDropdown = ({ openMenu, onToggle, onNavigate, onSelectItem }) => {

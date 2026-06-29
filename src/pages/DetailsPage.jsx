@@ -18,6 +18,7 @@ import { IoClose } from "react-icons/io5";
 import Seo from "../components/common/Seo";
 import { api } from "../axiosConfig";
 import { setIsNavbarModalOpen } from "../features/BasicSlice";
+import { buildPropertyUrl } from "../utils/propertyUrl";
 import "./DetailsPage.css";
 
 const safeArray = (value) => (Array.isArray(value) ? value : []);
@@ -593,9 +594,7 @@ const DetailsPage = () => {
   const similarPropertiesUrl = useMemo(() => {
     if (!location) return "/properties";
 
-    const params = new URLSearchParams();
-    params.set("location", location);
-    return `/properties?${params.toString()}`;
+    return buildPropertyUrl("/properties", { location });
   }, [location]);
   const showBrochureList = projectBrochure.length > 1;
 

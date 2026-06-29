@@ -6,6 +6,8 @@ import { FaFilter, FaList, FaMap } from "react-icons/fa";
 import Seo from "../components/common/Seo";
 import { api } from "../axiosConfig";
 import { setPropertiesList, setToggleView } from "../features/BasicSlice";
+import { buildPropertyUrl, getPropertyBasePath, getPropertyUrlParams } from "../utils/propertyUrl";
+import { extractProjectLocations } from "../utils/projectLocations";
 import "./PropertiesPage.css";
 import SideFilter from "../components/SideFilter";
 import PropertiesSearchBox from "../components/PropertiesSearchBox";
@@ -445,18 +447,18 @@ const PropertiesPage = () => {
   const [searchQuery, setSearchQuery] = useState("");
   const itemsPerPage = 10;
 
-  const searchParams = new URLSearchParams(location.search);
-  const selectedSearch = searchParams.get("search");
-  const selectedLocation = searchParams.get("location");
+  const cleanUrlParams = useMemo(() => getPropertyUrlParams(location), [location.pathname, location.search]);
+  const selectedSearch = cleanUrlParams.search;
+  const selectedLocation = cleanUrlParams.location;
   const isFreeTextSearch = Boolean(selectedSearch && !selectedLocation);
   const selectedLocationTerms = useMemo(
     () => normalizeLocationTerms(selectedLocation),
     [selectedLocation]
   );
-  const selectedType = searchParams.get("type");
-  const selectedBudget = searchParams.get("budget");
-  const selectedDeveloper = searchParams.get("developer");
-  const quick = searchParams.get("quick");
+  const selectedType = cleanUrlParams.type;
+  const selectedBudget = cleanUrlParams.budget;
+  const selectedDeveloper = cleanUrlParams.developer;
+  const quick = cleanUrlParams.quick;
   const activeRouteType = useMemo(() => {
     const path = location.pathname.toLowerCase();
     if (path.includes("apartments")) return "Apartment";
@@ -470,34 +472,47 @@ const PropertiesPage = () => {
     [selectedType, activeRouteType]
   );
 
+  useEffect(() => {
+    if (!location.search) return;
+
+    navigate(buildPropertyUrl(getPropertyBasePath(location.pathname), {
+      location: selectedLocation,
+      search: !selectedLocation ? selectedSearch : "",
+      type: selectedType,
+      budget: selectedBudget,
+      developer: selectedDeveloper,
+      quick,
+    }), {
+      replace: true,
+      state: location.state,
+    });
+  }, [
+    location.search,
+    location.pathname,
+    location.state,
+    navigate,
+    selectedLocation,
+    selectedSearch,
+    selectedType,
+    selectedBudget,
+    selectedDeveloper,
+    quick,
+  ]);
+
   const viewTypeHandleChange = (view) => {
     dispatch(setToggleView(view));
     if (view === "Map") {
-      const params = new URLSearchParams();
-
-      if (selectedLocation) {
-        params.set("location", selectedLocation);
-      } else if (selectedSearch) {
-        params.set("search", selectedSearch);
-      }
-
-      if (selectedType) {
-        params.set("type", selectedType);
-      }
-
-      if (selectedBudget) {
-        params.set("budget", selectedBudget);
-      }
-
-      if (selectedDeveloper) {
-        params.set("developer", selectedDeveloper);
-      } else if (Array.isArray(rawAiFilters?.developer_name) && rawAiFilters.developer_name[0]) {
-        params.set("developer", rawAiFilters.developer_name[0]);
-      } else if (storedFilter?.developer_name?.[0]) {
-        params.set("developer", storedFilter.developer_name[0]);
-      }
-
-      navigate(`/map${params.toString() ? `?${params.toString()}` : ""}`);
+      navigate(buildPropertyUrl("/map", {
+        location: selectedLocation || "",
+        search: !selectedLocation ? selectedSearch : "",
+        type: selectedType,
+        budget: selectedBudget,
+        developer:
+          selectedDeveloper ||
+          (Array.isArray(rawAiFilters?.developer_name) && rawAiFilters.developer_name[0]) ||
+          storedFilter?.developer_name?.[0] ||
+          "",
+      }));
     }
   };
 
@@ -628,15 +643,19 @@ const PropertiesPage = () => {
 
     if (activeSearchLocations.length > 0) {
       data = data.filter((item) => {
-        const itemLocation = normalizeFilterText(getPropertyLocation(item));
-        if (!itemLocation) return false;
-        return activeSearchLocations.some((location) => {
-          const normalizedLocation = normalizeFilterText(location);
-          return (
-            itemLocation.includes(normalizedLocation) ||
-            normalizedLocation.includes(itemLocation)
-          );
-        });
+        const itemLocations = extractProjectLocations(item)
+          .map(normalizeFilterText)
+          .filter(Boolean);
+
+        return itemLocations.some((itemLocation) =>
+          activeSearchLocations.some((location) => {
+            const normalizedLocation = normalizeFilterText(location);
+            return (
+              itemLocation.includes(normalizedLocation) ||
+              normalizedLocation.includes(itemLocation)
+            );
+          })
+        );
       });
     }
 

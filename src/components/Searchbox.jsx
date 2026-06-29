@@ -3,7 +3,13 @@ import { useLocation, useNavigate } from "react-router-dom";
 import { useDispatch, useSelector } from "react-redux";
 import "./searchbox.css";
 import { BUDGET_OPTIONS, PROPERTY_TYPE_OPTIONS } from "./searchData";
+import { api } from "../axiosConfig";
 import { setFilterdData, setToggleView, setPropertiesList } from "../features/BasicSlice";
+import { buildPropertyUrl } from "../utils/propertyUrl";
+import {
+  buildUniqueProjectLocations,
+  resolveProjectLocation,
+} from "../utils/projectLocations";
 
 const LOCATION_OPTIONS = [
   "Tambaram",
@@ -34,6 +40,7 @@ const Searchbox = () => {
   const [isLocationOpen, setIsLocationOpen] = useState(false);
   const [isBudgetOpen, setIsBudgetOpen] = useState(false);
   const [showMore, setShowMore] = useState(false);
+  const [liveLocations, setLiveLocations] = useState(LOCATION_OPTIONS);
 
   useEffect(() => {
     filterRef.current = filter;
@@ -67,6 +74,33 @@ const Searchbox = () => {
 
     document.addEventListener("mousedown", handleOutsideClick);
     return () => document.removeEventListener("mousedown", handleOutsideClick);
+  }, []);
+
+  useEffect(() => {
+    let isMounted = true;
+
+    const fetchLocations = async () => {
+      try {
+        const response = await api.post("get-filtered-listview-properties", {
+          paginate: 0,
+          per_page: 9999,
+        });
+        const items = response?.data?.data ?? response?.data ?? [];
+        const locations = buildUniqueProjectLocations(Array.isArray(items) ? items : []);
+
+        if (isMounted && locations.length > 0) {
+          setLiveLocations(Array.from(new Set([...LOCATION_OPTIONS, ...locations])));
+        }
+      } catch (error) {
+        console.error("Failed to load search locations:", error);
+      }
+    };
+
+    fetchLocations();
+
+    return () => {
+      isMounted = false;
+    };
   }, []);
 
   const [googlePredictions, setGooglePredictions] = useState([]);
@@ -137,36 +171,44 @@ const Searchbox = () => {
     return () => clearTimeout(timer);
   }, [searchValue]);
 
-  const filteredLocalLocations = LOCATION_OPTIONS.filter((loc) =>
+  const filteredLocalLocations = liveLocations.filter((loc) =>
     loc.toLowerCase().includes(searchValue.toLowerCase())
   );
 
   // Combine local and google predictions, removing duplicates
-  const combinedLocations = Array.from(new Set([...filteredLocalLocations, ...googlePredictions]));
+  const combinedLocations = Array.from(
+    new Map(
+      [...filteredLocalLocations, ...googlePredictions]
+        .map((location) => resolveProjectLocation(location, liveLocations))
+        .filter(Boolean)
+        .map((location) => [location.toLowerCase(), location])
+    ).values()
+  );
 
   const handleLocationSelect = (location) => {
-    setSelectedLocations((prev) => (prev.includes(location) ? prev : [...prev, location]));
-    setSearchValue(location);
+    const locationName = resolveProjectLocation(location, liveLocations);
+    if (!locationName) return;
+
+    setSelectedLocations((prev) => (prev.includes(locationName) ? prev : [...prev, locationName]));
+    setSearchValue(locationName);
     if (searchInputRef.current) {
-      searchInputRef.current.value = location;
+      searchInputRef.current.value = locationName;
     }
     setIsLocationOpen(false);
 
     dispatch(
       setFilterdData({
         ...filterRef.current,
-        search: [location],
-        property_area: [location],
+        search: [locationName],
+        property_area: [locationName],
         paginate: 1,
       })
     );
   };
 
   const handleSearch = () => {
-    const params = new URLSearchParams();
-
     const allSearchTerms = [...selectedLocations];
-    const typedValue = searchValue.trim();
+    const typedValue = resolveProjectLocation(searchValue, liveLocations);
 
     if (typedValue && !allSearchTerms.includes(typedValue)) {
       allSearchTerms.push(typedValue);
@@ -178,23 +220,21 @@ const Searchbox = () => {
       property_area: allSearchTerms,
     };
 
-    if (allSearchTerms.length > 0) {
-      params.set("location", allSearchTerms.join(", "));
-    }
-
     if (selectedType && selectedType !== "all") {
-      params.set("type", selectedType);
       filters.property_type = selectedType;
     }
 
     if (selectedBudget && selectedBudget !== "all") {
-      params.set("budget", selectedBudget);
       filters.budget = selectedBudget;
     }
 
     dispatch(setFilterdData(filters));
 
-    const targetUrl = `/properties${params.toString() ? `?${params.toString()}` : ""}`;
+    const targetUrl = buildPropertyUrl("/properties", {
+      location: allSearchTerms,
+      type: selectedType && selectedType !== "all" ? selectedType : "",
+      budget: selectedBudget && selectedBudget !== "all" ? selectedBudget : "",
+    });
     navigate(targetUrl, {
       state: {
         heading: allSearchTerms.length ? `${allSearchTerms.join(", ")} Properties` : "Chennai Properties",

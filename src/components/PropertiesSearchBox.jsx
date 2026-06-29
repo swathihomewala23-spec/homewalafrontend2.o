@@ -3,6 +3,8 @@ import { useDispatch } from "react-redux";
 import { useNavigate } from "react-router-dom";
 import { api } from "../axiosConfig";
 import { setFilterdData } from "../features/BasicSlice";
+import { buildPropertyUrl } from "../utils/propertyUrl";
+import { buildUniqueProjectLocations } from "../utils/projectLocations";
 import "./PropertiesSearch.css";
 
 const normalizeFilterText = (value) =>
@@ -19,15 +21,6 @@ const getPropertyTitle = (item) =>
   item?.property_title ||
   item?.name ||
   item?.project_title ||
-  "";
-
-const getPropertyLocation = (item) =>
-  item?.location ||
-  item?.property_area ||
-  item?.project_location ||
-  item?.locality ||
-  item?.address ||
-  item?.city ||
   "";
 
 const getPropertyDeveloper = (item) =>
@@ -95,17 +88,7 @@ const PropertiesSearchBox = ({ value, onChange }) => {
 
         if (isMounted) {
           setProjectTitles(titles);
-          setLocalityTitles(
-            Array.from(
-              new Map(
-                items
-                  .flatMap((item) => String(getPropertyLocation(item) || "").split(","))
-                  .map((location) => location.trim())
-                  .filter(Boolean)
-                  .map((location) => [location.toLowerCase(), location])
-              ).values()
-            )
-          );
+          setLocalityTitles(buildUniqueProjectLocations(items));
           setDeveloperTitles(
             Array.from(
               new Map(
@@ -194,7 +177,7 @@ const PropertiesSearchBox = ({ value, onChange }) => {
       return;
     }
 
-    const params = new URLSearchParams();
+    const cleanParams = {};
     const matchedLocation = localityTitles.find(
       (location) =>
         normalizeFilterText(location) === normalizeFilterText(finalQuery) ||
@@ -209,18 +192,18 @@ const PropertiesSearchBox = ({ value, onChange }) => {
     );
 
     if (matchedDeveloper) {
-      params.set("developer", matchedDeveloper);
+      cleanParams.developer = matchedDeveloper;
       filters.developer_name = [matchedDeveloper];
     } else if (matchedLocation) {
-      params.set("location", matchedLocation);
+      cleanParams.location = matchedLocation;
       filters.search = [matchedLocation];
       filters.property_area = [matchedLocation];
     } else {
-      params.set("search", finalQuery);
+      cleanParams.search = finalQuery;
     }
 
     dispatch(setFilterdData(filters));
-    navigate(`/properties?${params.toString()}`, {
+    navigate(buildPropertyUrl("/properties", cleanParams), {
       state: {
         heading: matchedDeveloper
           ? `${matchedDeveloper} Projects`

@@ -7,7 +7,7 @@ import Seo from "./common/Seo";
 
 const suggestions = [
   "Plots in Tambaram",
-  "Flats near schools",
+  "5 BHK Villa",
   "Budget apartments",
 ];
 

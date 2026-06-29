@@ -4,6 +4,8 @@ import { useLocation, useNavigate } from "react-router-dom";
 import { FaSearch, FaList, FaMapMarkerAlt, FaTimes } from "react-icons/fa";
 import { api } from "../axiosConfig";
 import { setToggleView, setPropertiesList } from "../features/BasicSlice";
+import { buildPropertyUrl, getPropertyUrlParams } from "../utils/propertyUrl";
+import { extractProjectLocations } from "../utils/projectLocations";
 import "./MapView.css";
 
 // ─── helpers ──────────────────────────────────────────────────────────────────
@@ -185,12 +187,36 @@ const MapView = () => {
   const [showSuggestions, setShowSuggestions] = useState(false);
   const [isLoadingPlaces, setIsLoadingPlaces] = useState(false);
   const [placedCount,     setPlacedCount]     = useState(0);
-  const searchParams = useMemo(() => new URLSearchParams(location.search), [location.search]);
-  const selectedSearch = searchParams.get("search");
-  const selectedLocation = searchParams.get("location");
-  const selectedType = searchParams.get("type");
-  const selectedBudget = searchParams.get("budget");
-  const selectedDeveloper = searchParams.get("developer");
+  const cleanUrlParams = useMemo(() => getPropertyUrlParams(location), [location.pathname, location.search]);
+  const selectedSearch = cleanUrlParams.search;
+  const selectedLocation = cleanUrlParams.location;
+  const selectedType = cleanUrlParams.type;
+  const selectedBudget = cleanUrlParams.budget;
+  const selectedDeveloper = cleanUrlParams.developer;
+
+  useEffect(() => {
+    if (!location.search) return;
+
+    navigate(buildPropertyUrl("/map", {
+      location: selectedLocation,
+      search: !selectedLocation ? selectedSearch : "",
+      type: selectedType,
+      budget: selectedBudget,
+      developer: selectedDeveloper,
+    }), {
+      replace: true,
+      state: location.state,
+    });
+  }, [
+    location.search,
+    location.state,
+    navigate,
+    selectedLocation,
+    selectedSearch,
+    selectedType,
+    selectedBudget,
+    selectedDeveloper,
+  ]);
 
   // flat array — same shape PropertiesPage uses
   const properties = useMemo(
@@ -204,14 +230,19 @@ const MapView = () => {
     const locationTerms = normalizeLocationTerms(selectedLocation);
     if (locationTerms.length > 0) {
       data = data.filter((item) => {
-        const itemLocation = normalizeText(getPropertyLocation(item));
-        return locationTerms.some((term) => {
-          const normalizedTerm = normalizeText(term);
-          return (
-            itemLocation.includes(normalizedTerm) ||
-            normalizedTerm.includes(itemLocation)
-          );
-        });
+        const itemLocations = extractProjectLocations(item)
+          .map(normalizeText)
+          .filter(Boolean);
+
+        return itemLocations.some((itemLocation) =>
+          locationTerms.some((term) => {
+            const normalizedTerm = normalizeText(term);
+            return (
+              itemLocation.includes(normalizedTerm) ||
+              normalizedTerm.includes(itemLocation)
+            );
+          })
+        );
       });
     }
 
@@ -582,7 +613,13 @@ const MapView = () => {
 
   const handleSwitchToList = () => {
     dispatch(setToggleView("List"));
-    navigate(`/properties${location.search || ""}`);
+    navigate(buildPropertyUrl("/properties", {
+      location: selectedLocation,
+      search: !selectedLocation ? selectedSearch : "",
+      type: selectedType,
+      budget: selectedBudget,
+      developer: selectedDeveloper,
+    }));
   };
 
   // ── 6. Merged from MapComponent: pan when filter.search changes ─────────────
